@@ -1,4 +1,4 @@
-# ForgeGraph
+# Commito
 
 Cliente Git desktop para Windows, com o histórico em forma de grafo (branches e merges em lanes coloridas), worktrees, stash, cherry-pick, rebase interativo e integração com **GitHub**, **GitLab** e **Bitbucket Cloud** — inclusive repositórios privados. Feito com **Tauri 2 + Vue 3 + TypeScript + shadcn-vue + Tailwind**, com o backend em **Rust**.
 
@@ -9,7 +9,7 @@ Cliente Git desktop para Windows, com o histórico em forma de grafo (branches e
 ## Instalação (usuário final)
 
 1. Instale o **Git for Windows** (inclui o Git Credential Manager): <https://git-scm.com/download/win>. Versão recomendada: 2.36 ou superior.
-2. Execute o instalador `ForgeGraph_0.1.0_x64-setup.exe` (veja abaixo onde ele é gerado).
+2. Execute o instalador `Commito_0.1.1_x64-setup.exe` (veja abaixo onde ele é gerado).
    - Instala por usuário (sem precisar de administrador), com atalho no Menu Iniciar e desinstalador em *Aplicativos instalados*.
    - Se o **WebView2** não estiver presente (raro no Windows 10/11 atualizados), o instalador baixa e instala automaticamente — requer internet nesse momento.
 3. O executável não é assinado digitalmente: o **SmartScreen** pode exibir “O Windows protegeu o computador”. Clique em *Mais informações → Executar assim mesmo*. Isso não é um defeito do app; a assinatura de código pode ser configurada no futuro (`bundle.windows.certificateThumbprint` ou `signCommand` no `tauri.conf.json`).
@@ -41,10 +41,42 @@ pnpm tauri build        # build de release + instalador NSIS
 ### Onde fica o instalador
 
 ```
-src-tauri\target\release\bundle\nsis\ForgeGraph_0.1.0_x64-setup.exe
+src-tauri\target\release\bundle\nsis\Commito_0.1.1_x64-setup.exe
 ```
 
-O executável do app (sem instalador) fica em `src-tauri\target\release\forgegraph.exe`.
+O executável do app (sem instalador) fica em `src-tauri\target\release\commito.exe`.
+
+## Releases, atualização automática e doações
+
+### Gerar uma versão
+
+1. Atualize a versão em `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` e `package.json`, e descreva as mudanças em `src/changelog.ts` (aparece em **Novidades** no rodapé e vira as notas da atualização).
+2. Rode:
+
+```powershell
+$env:COMMITO_UPDATE_URL = "https://github.com/<owner>/<repo>/releases/latest/download/latest.json"
+$env:COMMITO_DONATION_API_URL = "https://doacao.seudominio.com/pix"   # opcional
+pnpm release              # build assinado + latest.json
+pnpm release -- --publish # idem + cria a release no GitHub com o gh CLI
+```
+
+Saída em `src-tauri\target\release\bundle\nsis\`: `Commito_<versão>_x64-setup.exe`, o `.sig` e o `latest.json`. Publique os três na release (o `--publish` faz isso).
+eleaseundle
+sis\`: `Commito_<versão>_x64-setup.exe`, o `.sig` e o `latest.json`. Publique os três na release (o `--publish` faz isso).
+
+### Auto-update
+
+- O app procura atualização ao abrir e a cada 6 horas, na URL definida em `COMMITO_UPDATE_URL` **no momento do build**. Builds sem essa variável não procuram atualizações — gere a versão que você vai distribuir já com a URL definitiva.
+- Quando há versão nova, aparece um botão **laranja** no rodapé; ao clicar, o app baixa, **verifica a assinatura** e instala em modo silencioso, reabrindo com as mesmas abas.
+- A chave de assinatura fica em `%USERPROFILE%\.tauri\commito-updater.key` (+ `.password`); a chave pública está em `tauri.conf.json`. **Faça backup da chave privada e da senha e nunca as versione**: sem elas, os apps já instalados não aceitam novas atualizações.
+
+### Doações (PIX)
+
+O botão de coração no rodapé abre um modal com valores sugeridos e mostra o QR code e o "copia e cola" devolvidos pela sua API (`COMMITO_DONATION_API_URL`). Um exemplo pronto, que usa o Asaas (`POST /v3/pix/qrCodes/static`) e mantém a chave do Asaas apenas no servidor, está em [`server/donation-api`](server/donation-api/README.md).
+
+### Desenvolvimento isolado
+
+`COMMITO_CONFIG_DIR` aponta as configurações para outra pasta e `WEBVIEW2_USER_DATA_FOLDER` separa os dados do WebView2 — útil para rodar `pnpm tauri dev` com o app instalado aberto ao mesmo tempo.
 
 ## Uso rápido
 
@@ -54,17 +86,17 @@ O executável do app (sem instalador) fica em `src-tauri\target\release\forgegra
 - **Conflitos**: aparecem numa seção própria com “Nossa / Deles / Marcar resolvido”, visualização dos marcadores e banner com **Continuar / Pular / Abortar**.
 - **Barra lateral**: branches locais e remotas (agrupadas por pasta), worktrees (estado limpo/sujo, bloqueio), stashes, tags, remotes e submódulos — todos com menu de contexto.
 - **Desfazer**: só oferece operações locais comprovadamente reversíveis feitas no app (commit, amend, checkout, criar/excluir/renomear branch, tags, stash, merge/cherry-pick/revert/reset/pull locais) e apenas enquanto o repositório ainda está no estado deixado pela operação. Push nunca é “desfeito”.
-- Atalhos: `Ctrl+K` comandos · `F5` atualizar · `Esc` fecha o diff · `Ctrl+W` fecha a aba · `Ctrl+Shift+T` reabre aba · `Ctrl+Tab` próxima aba · `Ctrl+Alt+F` filtro da barra lateral.
+- Atalhos: `Ctrl+K` comandos · `F5` atualizar · `Esc` fecha o diff · `Ctrl+W` fecha a aba · `Ctrl+Shift+T` reabre aba · `Ctrl+Tab` próxima aba · `Ctrl+Alt+F` filtro da barra lateral · `Ctrl +` / `Ctrl −` / `Ctrl+0` (ou `Ctrl`+roda do mouse) zoom da interface, lembrado entre sessões.
 
 ## Autenticação
 
-O ForgeGraph separa dois assuntos:
+O Commito separa dois assuntos:
 
 ### 1. Transporte Git (fetch / pull / push / clone)
 
 - **HTTPS**: por padrão o Git usa o **Git Credential Manager** (login pelo navegador; credenciais no cofre do Windows). Nenhuma conta precisa estar conectada no app.
 - **SSH**: o Git usa suas chaves, o `ssh-agent` do Windows, `~/.ssh/config` e `known_hosts`. O app nunca lê ou pede a chave privada. Em **Configurações → SSH / HTTPS** há um diagnóstico (agente ativo, chaves carregadas). Na primeira conexão a um host, aceite a chave do host pelo terminal (`ssh -T git@github.com`).
-- **Opcional — token de uma conta conectada**: em **Configurações → Repositório** (ou ao clonar a partir de uma conta) você pode fazer o Git usar o token da conta. O token é lido do cofre pelo próprio executável do ForgeGraph atuando como `GIT_ASKPASS`; **ele nunca aparece em URLs, linhas de comando, logs ou na interface**, e só é enviado para remotes HTTPS do mesmo host da conta.
+- **Opcional — token de uma conta conectada**: em **Configurações → Repositório** (ou ao clonar a partir de uma conta) você pode fazer o Git usar o token da conta. O token é lido do cofre pelo próprio executável do Commito atuando como `GIT_ASKPASS`; **ele nunca aparece em URLs, linhas de comando, logs ou na interface**, e só é enviado para remotes HTTPS do mesmo host da conta.
 - “Testar conexão” no menu do remote executa `git ls-remote` para confirmar que as credenciais Git funcionam (validar a API não garante permissão de push).
 
 ### 2. Contas de API (listar e clonar repositórios)
@@ -77,9 +109,9 @@ Em **Contas** (barra superior):
 | **GitLab** (gitlab.com ou self-managed via URL base HTTPS) | Personal Access Token em *Preferences → Access tokens* | `read_api` (listar), `read_repository` / `write_repository` (Git com token) |
 | **Bitbucket Cloud** | **E-mail da conta Atlassian** + **API token com escopos** (<https://id.atlassian.com/manage-profile/security/api-tokens>). *App Passwords foram descontinuadas e não são usadas.* | `read:user:bitbucket`, `read:workspace:bitbucket`, `read:repository:bitbucket`, `write:repository:bitbucket` |
 
-- Os tokens ficam **somente** no **Gerenciador de Credenciais do Windows** (entrada `ForgeGraph`/`account:<id>`). O arquivo de configurações guarda apenas metadados (usuário, provedor, URL base).
+- Os tokens ficam **somente** no **Gerenciador de Credenciais do Windows** (entrada `Commito`/`account:<id>`). O arquivo de configurações guarda apenas metadados (usuário, provedor, URL base).
 - Várias contas por provedor são suportadas (use o campo “Rótulo”).
-- Desconectar remove apenas a entrada do ForgeGraph; credenciais do GCM e de outros apps não são tocadas.
+- Desconectar remove apenas a entrada do Commito; credenciais do GCM e de outros apps não são tocadas.
 - Bitbucket: os workspaces vêm de `GET /2.0/user/workspaces` e os repositórios de `GET /2.0/repositories/{workspace}` (os endpoints antigos foram removidos pela Atlassian). Git HTTPS com token usa o usuário estático `x-bitbucket-api-token-auth`.
 - Redirecionamentos HTTP para outro host são bloqueados, para que tokens nunca sejam enviados a um servidor diferente.
 
@@ -130,7 +162,7 @@ Decisões técnicas:
 | Bitbucket 401 | Use o **e-mail Atlassian** (não o username) e um API token **com escopos**. |
 | SmartScreen ao instalar | Executável não assinado — *Mais informações → Executar assim mesmo*. |
 
-As configurações ficam em `%APPDATA%\dev.forgegraph.app\settings.json` (apenas preferências, abas, recentes e metadados de contas).
+As configurações ficam em `%APPDATA%\dev.commito.app\settings.json` (apenas preferências, abas, recentes e metadados de contas).
 
 ## Limitações
 

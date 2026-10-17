@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { onMounted, ref } from 'vue'
 import { History, LoaderCircle } from '@lucide/vue'
 import { api, toAppError } from '@/services/api'
@@ -43,7 +44,7 @@ async function pick(c: HistoryEntry) {
       >
         <History class="size-3.5 shrink-0 text-muted-foreground" />
         <span class="mono text-[11.5px] text-primary">{{ shortSha(c.hash) }}</span>
-        <span class="min-w-0 flex-1 truncate text-[12.5px]">{{ c.subject }}</span>
+        <span class="min-w-0 flex-1 truncate text-[12.5px]">{{ emojify(c.subject) }}</span>
         <span class="max-w-32 truncate text-[11.5px] text-muted-foreground">{{ c.authorName }}</span>
         <span class="w-24 shrink-0 text-right text-[11.5px] text-muted-foreground" :title="absoluteTime(c.authorTime)">{{ relativeTime(c.authorTime) }}</span>
       </button>

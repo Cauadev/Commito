@@ -1,6 +1,6 @@
 // Portuguese (Brazil) — default UI strings.
 const ptBR: Record<string, string> = {
-  'app.name': 'ForgeGraph',
+  'app.name': 'Commito',
   'toolbar.repository': 'repositório',
   'toolbar.branch': 'branch',
   'toolbar.undo': 'Desfazer',

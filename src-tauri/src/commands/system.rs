@@ -263,3 +263,64 @@ mod tests {
     }
 }
 
+
+// ------------------------------------------------------------------ donation (PIX via owner's API)
+
+#[derive(Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DonationPix {
+    /// PNG QR code, base64 (no data: prefix).
+    pub encoded_image: String,
+    /// PIX "copia e cola" payload.
+    pub payload: String,
+    pub expiration_date: Option<String>,
+}
+
+/// Donation endpoint: set at build time with `COMMITO_DONATION_API_URL`, or at runtime with
+/// the same environment variable (useful for testing a local server).
+pub fn donation_api_url() -> Option<String> {
+    std::env::var("COMMITO_DONATION_API_URL")
+        .ok()
+        .or_else(|| option_env!("COMMITO_DONATION_API_URL").map(str::to_string))
+        .filter(|u| !u.trim().is_empty())
+}
+
+#[tauri::command]
+pub fn donation_available() -> bool {
+    donation_api_url().is_some()
+}
+
+#[tauri::command]
+pub async fn donation_pix(state: State<'_, AppState>, value: Option<f64>) -> AppResult<DonationPix> {
+    let base = donation_api_url().ok_or_else(|| AppError::new(ErrorCode::NotFound, "Doações ainda não foram configuradas nesta versão."))?;
+    let mut url = url::Url::parse(&base).map_err(|_| AppError::internal("URL da API de doação inválida."))?;
+    let local = matches!(url.host_str(), Some("localhost") | Some("127.0.0.1"));
+    if url.scheme() != "https" && !local {
+        return Err(AppError::internal("A API de doação precisa usar HTTPS."));
+    }
+    if let Some(v) = value {
+        if !(1.0..=10_000.0).contains(&v) {
+            return Err(AppError::invalid("Valor inválido (entre R$ 1 e R$ 10.000)."));
+        }
+        url.query_pairs_mut().append_pair("value", &format!("{v:.2}"));
+    }
+    let resp = state.http.get(url).header(reqwest::header::ACCEPT, "application/json").send().await?;
+    if !resp.status().is_success() {
+        return Err(AppError::new(ErrorCode::Provider, format!("O serviço de doação respondeu HTTP {}.", resp.status().as_u16()))
+            .recovery("Tente novamente em alguns minutos."));
+    }
+    let bytes = resp.bytes().await?;
+    if bytes.len() > 2 * 1024 * 1024 {
+        return Err(AppError::new(ErrorCode::Provider, "Resposta do serviço de doação grande demais."));
+    }
+    let pix: DonationPix = serde_json::from_slice(&bytes).map_err(|e| AppError::new(ErrorCode::Provider, "Resposta inesperada do serviço de doação.").details(e.to_string()))?;
+    let image = pix.encoded_image.trim().trim_start_matches("data:image/png;base64,").to_string();
+    use base64::Engine;
+    let decoded = base64::engine::general_purpose::STANDARD
+        .decode(image.as_bytes())
+        .map_err(|_| AppError::new(ErrorCode::Provider, "QR code inválido recebido do serviço de doação."))?;
+    if !decoded.starts_with(b"\x89PNG") || !pix.payload.starts_with("000201") {
+        return Err(AppError::new(ErrorCode::Provider, "QR code PIX inválido recebido do serviço de doação."));
+    }
+    Ok(DonationPix { encoded_image: image, payload: pix.payload, expiration_date: pix.expiration_date })
+}

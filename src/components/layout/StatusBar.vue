@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { ArrowDown, ArrowUp, CircleAlert, FileDiff, GitBranch, LoaderCircle, Wifi, WifiOff, X, Link2Off } from '@lucide/vue'
 import { api } from '@/services/api'
+import FooterActions from './FooterActions.vue'
 import { relativeTime } from '@/lib/format'
 import { useAppStore } from '@/stores/app'
 import type { RepoStore } from '@/stores/repo'
@@ -45,7 +46,14 @@ const ops = computed(() => Object.values(ui.ops).filter((o) => !o.repo || o.repo
         <button v-if="o.cancellable" class="rounded p-0.5 hover:bg-muted" title="Cancelar" @click="api.cancelOperation(o.opId)"><X class="size-3.5" /></button>
       </span>
       <span v-if="repo.lastFetch" class="shrink-0">sincronizado {{ relativeTime(repo.lastFetch / 1000) }}</span>
+      <button
+        v-if="Math.abs(ui.prefs.zoom - 1) > 0.001"
+        class="shrink-0 rounded px-1 tabular-nums hover:bg-muted hover:text-foreground"
+        title="Zoom da interface (Ctrl + / Ctrl − / Ctrl+0). Clique para voltar a 100%."
+        @click="ui.stepZoom(0)"
+      >{{ Math.round(ui.prefs.zoom * 100) }}%</button>
       <span class="shrink-0 text-faint">{{ app.info?.gitVersion?.replace('git version ', 'git ') }}</span>
+      <FooterActions />
     </div>
   </div>
 </template>

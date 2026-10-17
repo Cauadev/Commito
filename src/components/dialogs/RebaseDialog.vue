@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed, onMounted, ref } from 'vue'
 import { ArrowDown, ArrowUp, LoaderCircle } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
@@ -67,7 +68,7 @@ function submit() {
           <option v-for="a in actions" :key="a.value" :value="a.value" class="bg-popover">{{ a.label }}</option>
         </select>
         <span class="mono text-[11.5px] text-muted-foreground">{{ shortSha(it.hash) }}</span>
-        <span class="min-w-0 flex-1 truncate" :class="it.action === 'drop' ? 'line-through' : ''">{{ it.subject }}</span>
+        <span class="min-w-0 flex-1 truncate" :class="it.action === 'drop' ? 'line-through' : ''">{{ emojify(it.subject) }}</span>
         <span class="max-w-28 truncate text-[11.5px] text-muted-foreground">{{ it.author }}</span>
         <Button variant="ghost" size="icon-xs" :disabled="i === 0" @click="move(i, -1)"><ArrowUp /></Button>
         <Button variant="ghost" size="icon-xs" :disabled="i === items.length - 1" @click="move(i, 1)"><ArrowDown /></Button>

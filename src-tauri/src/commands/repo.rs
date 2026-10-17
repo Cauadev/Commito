@@ -27,7 +27,16 @@ async fn open_resolved(app: &AppHandle, state: &AppState, resolved: &ResolvedRep
     let key = crate::state::norm_key(&resolved.path);
     let has_watch = state.watchers.lock().unwrap().contains_key(&key);
     if !has_watch && !resolved.bare {
-        match crate::watcher::watch(app, &resolved.path, Path::new(&resolved.path), Path::new(&resolved.git_dir), Path::new(&resolved.common_dir)) {
+        // Other worktrees nested inside this one (e.g. `.worktrees/*`) must not refresh this tab.
+        let nested: Vec<std::path::PathBuf> = match state.git() {
+            Ok(git) => git
+                .read(Path::new(&resolved.path), &["worktree", "list", "--porcelain"])
+                .await
+                .map(|raw| crate::git::refs::parse_worktrees(&raw).into_iter().map(|w| std::path::PathBuf::from(crate::state::native_path(&w.path))).collect())
+                .unwrap_or_default(),
+            Err(_) => vec![],
+        };
+        match crate::watcher::watch(app, &resolved.path, Path::new(&resolved.path), Path::new(&resolved.git_dir), Path::new(&resolved.common_dir), &nested) {
             Ok(h) => {
                 state.watchers.lock().unwrap().insert(key, h);
             }

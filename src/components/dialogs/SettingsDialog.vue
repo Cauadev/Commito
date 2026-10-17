@@ -95,7 +95,7 @@ const pullConfig = computed(() => {
   if (id.pullFf === 'only') return 'somente fast-forward (pull.ff=only)'
   if (id.pullRebase === 'true') return 'rebase (pull.rebase=true)'
   if (id.pullRebase === 'false') return 'merge (pull.rebase=false)'
-  return 'não definido (o ForgeGraph usa merge)'
+  return 'não definido (o Commito usa merge)'
 })
 const tabs: { id: Tab; label: string }[] = [
   { id: 'general', label: 'Geral' },
@@ -195,7 +195,7 @@ const tabs: { id: Tab; label: string }[] = [
 
     <div v-else-if="tab === 'ssh'" class="grid gap-3 text-[12.5px]">
       <p class="text-muted-foreground">
-        HTTPS: o Git usa o Git Credential Manager (login pelo navegador; credenciais no cofre do Windows). SSH: o Git usa suas chaves, o agente <span class="mono">ssh-agent</span>, <span class="mono">~/.ssh/config</span> e <span class="mono">known_hosts</span>. O ForgeGraph nunca lê nem pede sua chave privada.
+        HTTPS: o Git usa o Git Credential Manager (login pelo navegador; credenciais no cofre do Windows). SSH: o Git usa suas chaves, o agente <span class="mono">ssh-agent</span>, <span class="mono">~/.ssh/config</span> e <span class="mono">known_hosts</span>. O Commito nunca lê nem pede sua chave privada.
       </p>
       <Button class="w-fit" variant="outline" :disabled="sshLoading" @click="runSsh"><LoaderCircle v-if="sshLoading" class="animate-spin" /> Diagnosticar SSH</Button>
       <div v-if="ssh" class="grid gap-1 rounded-lg border bg-panel p-3">

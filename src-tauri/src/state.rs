@@ -70,7 +70,7 @@ impl AppState {
     pub fn git(&self) -> AppResult<GitRunner> {
         self.git.read().unwrap().clone().ok_or_else(|| {
             AppError::new(ErrorCode::GitNotFound, "Git não encontrado neste computador.")
-                .recovery("Instale o Git for Windows (inclui o Git Credential Manager) e reinicie o ForgeGraph, ou informe o caminho do git.exe nas Configurações.")
+                .recovery("Instale o Git for Windows (inclui o Git Credential Manager) e reinicie o Commito, ou informe o caminho do git.exe nas Configurações.")
         })
     }
 

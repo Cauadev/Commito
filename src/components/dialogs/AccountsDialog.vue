@@ -72,7 +72,7 @@ async function test(a: ProviderAccount) {
 async function remove(a: ProviderAccount) {
   const c = await ui.confirm({
     title: `Desconectar ${a.username}`,
-    message: 'O token desta conta será removido do cofre do Windows (somente a entrada do ForgeGraph; credenciais de outros apps e do Git Credential Manager não são tocadas). Repositórios que usavam esta conta voltam a usar o GCM.',
+    message: 'O token desta conta será removido do cofre do Windows (somente a entrada do Commito; credenciais de outros apps e do Git Credential Manager não são tocadas). Repositórios que usavam esta conta voltam a usar o GCM.',
     confirmLabel: 'Desconectar',
     destructive: true,
   })

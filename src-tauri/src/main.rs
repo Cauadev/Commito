@@ -4,8 +4,8 @@
 fn main() {
     // When git launches this executable as GIT_ASKPASS, answer the prompt and exit
     // without starting the UI.
-    if let Some(code) = forgegraph_lib::credentials::maybe_run_askpass() {
+    if let Some(code) = commito_lib::credentials::maybe_run_askpass() {
         std::process::exit(code);
     }
-    forgegraph_lib::run()
+    commito_lib::run()
 }

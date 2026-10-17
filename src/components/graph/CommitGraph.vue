@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useElementSize, useEventListener } from '@vueuse/core'
 import { ChevronDown, ChevronUp, Columns3, LoaderCircle, Pencil, Plus, Minus, Search, X } from '@lucide/vue'
@@ -375,9 +376,9 @@ const avatarStyle = (name: string) => ({ background: `oklch(0.62 0.12 ${hashHue(
                 </template>
                 <template v-else-if="row.kind === 'stash'">
                   <span class="rounded bg-muted px-1 text-[10.5px] text-muted-foreground">{{ row.stashRef }}</span>
-                  <span class="truncate text-muted-foreground italic">{{ row.subject }}</span>
+                  <span class="truncate text-muted-foreground italic">{{ emojify(row.subject) }}</span>
                 </template>
-                <span v-else class="truncate" :class="row.parents.length > 1 ? 'text-muted-foreground' : ''" :title="row.subject">{{ row.subject }}</span>
+                <span v-else class="truncate" :class="row.parents.length > 1 ? 'text-muted-foreground' : ''" :title="emojify(row.subject)">{{ emojify(row.subject) }}</span>
               </div>
               <!-- author -->
               <div v-if="cols.showAuthor" class="flex shrink-0 items-center gap-1.5 overflow-hidden px-2 text-muted-foreground" :style="{ width: cols.author + 'px' }">

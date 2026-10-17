@@ -11,9 +11,9 @@ use crate::errors::{AppError, AppResult, ErrorCode};
 use crate::git::runner::RunOpts;
 use crate::settings::{Provider, ProviderAccount};
 
-const SERVICE: &str = "ForgeGraph";
-pub const ASKPASS_ACCOUNT_ENV: &str = "FORGEGRAPH_ASKPASS_ACCOUNT";
-pub const ASKPASS_USER_ENV: &str = "FORGEGRAPH_ASKPASS_USER";
+const SERVICE: &str = "Commito";
+pub const ASKPASS_ACCOUNT_ENV: &str = "COMMITO_ASKPASS_ACCOUNT";
+pub const ASKPASS_USER_ENV: &str = "COMMITO_ASKPASS_USER";
 
 fn entry(account_id: &str) -> AppResult<keyring::Entry> {
     keyring::Entry::new(SERVICE, &format!("account:{account_id}")).map_err(vault_err)

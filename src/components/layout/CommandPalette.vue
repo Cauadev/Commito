@@ -7,6 +7,7 @@ import { useActions } from '@/features/actions'
 import { cloneRepo, initRepo, openRepoFolder } from '@/features/repos'
 import { api, toAppError } from '@/services/api'
 import { shortSha } from '@/lib/format'
+import { emojify } from '@/lib/emoji'
 import { useAppStore } from '@/stores/app'
 import { useUiStore } from '@/stores/ui'
 import AccountsDialog from '@/components/dialogs/AccountsDialog.vue'
@@ -78,7 +79,7 @@ watch(q, (s) => {
   searchTimer = setTimeout(async () => {
     try {
       const hashes = await api.searchCommits(repo.path, s.trim(), repo.scope)
-      commitHits.value = hashes.slice(0, 15).map((h) => ({ hash: h, subject: repo.rows[repo.rowIndex.get(h) ?? -1]?.subject ?? `Commit ${shortSha(h)}` }))
+      commitHits.value = hashes.slice(0, 15).map((h) => ({ hash: h, subject: emojify(repo.rows[repo.rowIndex.get(h) ?? -1]?.subject ?? `Commit ${shortSha(h)}`) }))
     } catch {
       /* ignore */
     }

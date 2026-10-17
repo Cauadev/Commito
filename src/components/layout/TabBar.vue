@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FolderGit2, House, Plus, X } from '@lucide/vue'
+import { FolderGit2, House, LoaderCircle, Plus, X } from '@lucide/vue'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { copyText } from '@/features/actions'
 import { api, toAppError } from '@/services/api'
@@ -58,6 +58,15 @@ const changes = (t: ResolvedRepo) => findRepoStore(t.path)?.changeCount ?? 0
             <button class="ml-auto rounded p-0.5 opacity-0 group-hover:opacity-100 hover:bg-muted" :class="t.path === app.activePath ? 'opacity-70' : ''" title="Fechar (Ctrl+W)" @click.stop="app.closeTab(t.path)">
               <X class="size-3.5" />
             </button>
+          </div>
+          <div
+            v-for="p in app.opening.filter((o) => !app.tabs.some((t) => t.path.toLowerCase() === o.toLowerCase()))"
+            :key="'opening:' + p"
+            class="flex max-w-56 min-w-28 items-center gap-1.5 border-r px-3 text-[12.5px] text-muted-foreground"
+            :title="`Abrindo ${p}…`"
+          >
+            <LoaderCircle class="size-3.5 shrink-0 animate-spin" />
+            <span class="truncate">{{ p.split(/[\\/]/).filter(Boolean).pop() }}</span>
           </div>
           <button class="flex w-9 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground" title="Abrir outro repositório" @click="app.showHome()">
             <Plus class="size-4" />

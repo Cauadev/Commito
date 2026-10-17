@@ -1,4 +1,4 @@
-# ForgeGraph — status da implementação
+# Commito — status da implementação
 
 Legenda: ✅ implementado **e verificado** (teste automatizado e/ou execução real do app) · 🟡 implementado, verificação parcial · ⛔ não implementado.
 
@@ -39,6 +39,17 @@ Verificação real feita com o app rodando (`pnpm tauri dev`) e dirigido via Web
 | Tema escuro (padrão) e claro | ✅ escuro · 🟡 claro | |
 | i18n | 🟡 | Camada `t()` com dicionário pt-BR usada no shell; parte dos textos ainda está inline em pt-BR. |
 
+## v0.2.0
+
+| Item | Status | Observações |
+|---|---|---|
+| Emojis em mensagens (`:sparkles:` → ✨, base gemoji do GitHub) | ✅ | Grafo, detalhes, stash, histórico, blame, paleta. |
+| Abertura de repositórios grandes / worktrees aninhadas | ✅ | Watcher trocado por notify bruto + debounce próprio (sem varredura da árvore); Comiag (12 worktrees, ~227 mil arquivos) abre em ~0,3 s. |
+| Troca de aba durante abertura não “volta” mais | ✅ | Abertura assíncrona só ativa a aba se o usuário não navegou; abas restauradas em paralelo com indicador. |
+| Doação PIX (modal + QR via API própria) | ✅ app · 🟡 servidor | App testado com API mock; o servidor de exemplo (Asaas) não foi executado contra o Asaas real. |
+| Changelog no rodapé | ✅ | |
+| Auto-update (verificação, botão laranja, download assinado, instalação passiva) | ✅ verificação/assinatura · 🟡 instalação | Testado com feed local: detecção, botão, recusa de assinatura adulterada e de versão divergente. A instalação em si não foi executada (o app instalado do usuário estava aberto). Requer `COMMITO_UPDATE_URL` no build. |
+
 ## Provedores
 
 | Item | Status | Observações |
@@ -57,7 +68,7 @@ Verificação real feita com o app rodando (`pnpm tauri dev`) e dirigido via Web
 | Item | Status |
 |---|---|
 | `bundle.targets = ["nsis"]`, instalação por usuário, pt-BR/inglês, bootstrapper do WebView2, ícones próprios | ✅ configurado |
-| Instalador gerado | ✅ `src-tauri/target/release/bundle/nsis/ForgeGraph_0.1.0_x64-setup.exe` (2,65 MiB). Verificado: instalação silenciosa por usuário em `%LOCALAPPDATA%\ForgeGraph`, atalho no Menu Iniciar, entrada de desinstalação, app instalado abriu repositórios reais (grafo, diff), desinstalação limpa. |
+| Instalador gerado | ✅ `src-tauri/target/release/bundle/nsis/Commito_0.1.1_x64-setup.exe` (2,65 MiB). Verificado: instalação silenciosa por usuário em `%LOCALAPPDATA%\Commito`, atalho no Menu Iniciar, entrada de desinstalação, app instalado abriu repositórios reais (grafo, diff), desinstalação limpa. |
 | Assinatura de código | ⛔ (configurável no futuro; SmartScreen pode alertar) |
 | Git portátil embutido no instalador | ⛔ (usa o Git for Windows instalado; onboarding explica a dependência) |
 

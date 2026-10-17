@@ -357,7 +357,7 @@ pub async fn checkout(repo: &Repo, target: &CheckoutTarget, auto_stash: bool) ->
     if auto_stash {
         let st = read::status(repo, false).await?;
         if !(st.staged.is_empty() && st.unstaged.is_empty()) {
-            run_simple(repo, s(&["stash", "push", "--include-untracked", "-m", "ForgeGraph: auto-stash antes do checkout"]), "", &[]).await?;
+            run_simple(repo, s(&["stash", "push", "--include-untracked", "-m", "Commito: auto-stash antes do checkout"]), "", &[]).await?;
             stashed = true;
         }
     }
@@ -480,7 +480,7 @@ pub async fn rebase_interactive(repo: &Repo, base: &str, todo: &[TodoItem]) -> A
         }
         text.push_str(&format!("{action} {}\n", item.hash));
     }
-    let dir = std::env::temp_dir().join("forgegraph");
+    let dir = std::env::temp_dir().join("commito");
     std::fs::create_dir_all(&dir)?;
     let file = dir.join(format!("rebase-todo-{}.txt", uuid::Uuid::new_v4()));
     std::fs::write(&file, text)?;

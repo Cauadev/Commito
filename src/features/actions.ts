@@ -263,7 +263,7 @@ export function useActions(repo: RepoStore) {
   async function deleteRemoteBranch(ref: GitRef) {
     const c = await ui.confirm({
       title: `Excluir '${ref.short}' do remote`,
-      message: `A branch será apagada no servidor '${ref.remote}' para todos os colaboradores. Esta ação não pode ser desfeita pelo ForgeGraph.`,
+      message: `A branch será apagada no servidor '${ref.remote}' para todos os colaboradores. Esta ação não pode ser desfeita pelo Commito.`,
       confirmLabel: 'Excluir no remote',
       destructive: true,
       typeToConfirm: ref.short.slice((ref.remote?.length ?? 0) + 1),

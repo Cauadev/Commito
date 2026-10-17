@@ -1,6 +1,7 @@
 // Toasts, operation progress, dialogs and persisted UI preferences.
 import { defineStore } from 'pinia'
 import { reactive, ref, shallowRef, watch, type Component } from 'vue'
+import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { api } from '@/services/api'
 import type { AppError, ProgressPayload } from '@/types/git'
 
@@ -52,6 +53,7 @@ export interface UiPrefs {
   pullStrategy: 'config' | 'merge' | 'rebase' | 'ff_only'
   showWhitespace: boolean
   wordWrap: boolean
+  zoom: number
 }
 
 const defaultPrefs: UiPrefs = {
@@ -67,6 +69,7 @@ const defaultPrefs: UiPrefs = {
   pullStrategy: 'config',
   showWhitespace: false,
   wordWrap: false,
+  zoom: 1,
 }
 
 export const useUiStore = defineStore('ui', () => {
@@ -145,7 +148,22 @@ export const useUiStore = defineStore('ui', () => {
       }
     }
     applyTheme()
+    if (prefs.zoom !== 1) applyZoom()
     prefsLoaded.value = true
+  }
+  const ZOOM_STEPS = [0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2]
+  function applyZoom() {
+    getCurrentWebview().setZoom(prefs.zoom).catch(() => {})
+  }
+  /** Steps through the zoom levels (dir = +1 / -1), or resets with 0. */
+  function stepZoom(dir: 1 | -1 | 0) {
+    if (dir === 0) prefs.zoom = 1
+    else {
+      const i = ZOOM_STEPS.findIndex((z) => z >= prefs.zoom - 0.001)
+      const cur = i < 0 ? ZOOM_STEPS.length - 1 : i
+      prefs.zoom = ZOOM_STEPS[Math.max(0, Math.min(ZOOM_STEPS.length - 1, cur + dir))]
+    }
+    applyZoom()
   }
   function applyTheme() {
     document.documentElement.classList.toggle('dark', prefs.theme === 'dark')
@@ -170,6 +188,6 @@ export const useUiStore = defineStore('ui', () => {
     dialog, openDialog, closeDialog,
     confirmState, confirm, resolveConfirm,
     detailsText, paletteOpen,
-    prefs, loadPrefs,
+    prefs, loadPrefs, stepZoom,
   }
 })

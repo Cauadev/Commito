@@ -1,4 +1,4 @@
-//! ForgeGraph — desktop Git client (Tauri 2 backend).
+//! Commito — desktop Git client (Tauri 2 backend).
 
 pub mod commands;
 pub mod credentials;
@@ -9,6 +9,7 @@ pub mod providers;
 pub mod redact;
 pub mod settings;
 pub mod state;
+pub mod updater;
 pub mod watcher;
 
 #[cfg(test)]
@@ -24,8 +25,14 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updater::PendingUpdate::default())
         .setup(|app| {
-            let dir = app.path().app_config_dir().unwrap_or_else(|_| std::env::temp_dir().join("forgegraph"));
+            // COMMITO_CONFIG_DIR isolates settings (tests / a second profile) from the user's normal config.
+            let dir = std::env::var_os("COMMITO_CONFIG_DIR")
+                .map(std::path::PathBuf::from)
+                .or_else(|| app.path().app_config_dir().ok())
+                .unwrap_or_else(|| std::env::temp_dir().join("commito"));
             app.manage(AppState::new(dir.join("settings.json")));
             Ok(())
         })
@@ -44,6 +51,13 @@ pub fn run() {
             system::open_url,
             system::open_terminal,
             system::ssh_diagnostics,
+            system::donation_available,
+            system::donation_pix,
+            updater::update_configured,
+            updater::update_check,
+            updater::update_install,
+            #[cfg(debug_assertions)]
+            updater::update_verify_only,
             repo::open_repository,
             repo::close_repository,
             repo::init_repository,
@@ -125,5 +139,5 @@ pub fn run() {
             accounts::token_help,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running ForgeGraph");
+        .expect("error while running Commito");
 }

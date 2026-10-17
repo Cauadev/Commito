@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed, reactive, ref } from 'vue'
 import {
   Archive, ArchiveRestore, Cloud, Copy, Download, ExternalLink, FolderGit2, FolderOpen, GitBranchPlus, Globe, Laptop,
@@ -191,7 +192,7 @@ const base = (p: string) => p.split(/[\\/]/).filter(Boolean).pop() ?? p
               @contextmenu="menu = { type: 'stash', s }"
             >
               <Archive class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="truncate">{{ s.message }}</span>
+              <span class="truncate">{{ emojify(s.message) }}</span>
               <span class="ml-auto shrink-0 text-[10.5px] text-faint">{{ relativeTime(s.time) }}</span>
             </div>
             <p v-if="!stashes.length" class="px-4 py-1 text-[12px] text-muted-foreground">Nenhum stash.</p>

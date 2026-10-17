@@ -46,6 +46,12 @@ export const api = {
   openUrl: (url: string) => call<void>('open_url', { url }),
   openTerminal: (path: string) => call<void>('open_terminal', { path }),
   sshDiagnostics: () => call<SshDiagnostics>('ssh_diagnostics'),
+  updateConfigured: () => call<boolean>('update_configured'),
+  updateCheck: () => call<UpdateInfo | null>('update_check'),
+  updateInstall: () => call<void>('update_install'),
+  donationAvailable: () => call<boolean>('donation_available'),
+  donationPix: (value: number | null) =>
+    call<{ encodedImage: string; payload: string; expirationDate?: string | null }>('donation_pix', { value }),
 
   // repository
   openRepository: (path: string) => call<ResolvedRepo>('open_repository', { path }),
@@ -154,7 +160,11 @@ export const api = {
   tokenHelp: (provider: Provider) => call<string>('token_help', { provider }),
 }
 
+export interface UpdateInfo { version: string; currentVersion: string; date?: string | null; notes?: string | null }
+export interface UpdateProgress { downloaded: number; total?: number | null; finished: boolean }
+
 export const events = {
+  onUpdateProgress: (cb: (p: UpdateProgress) => void): Promise<UnlistenFn> => listen<UpdateProgress>('fg://update-progress', (e) => cb(e.payload)),
   onProgress: (cb: (p: ProgressPayload) => void): Promise<UnlistenFn> => listen<ProgressPayload>('fg://progress', (e) => cb(e.payload)),
   onRepoChanged: (cb: (p: RepoChangedPayload) => void): Promise<UnlistenFn> =>
     listen<RepoChangedPayload>('fg://repo-changed', (e) => cb(e.payload)),

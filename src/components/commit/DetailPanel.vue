@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed } from 'vue'
 import { CherryIcon, Copy, GitCompareArrows } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
@@ -40,7 +41,7 @@ async function compareEnds() {
     <div class="min-h-0 flex-1 overflow-auto">
       <div v-for="h in multi" :key="h" class="flex items-center gap-2 border-b px-3 py-1.5 text-[12.5px]">
         <span class="mono text-[11.5px] text-primary">{{ shortSha(h) }}</span>
-        <span class="truncate">{{ repo.rows[repo.rowIndex.get(h) ?? -1]?.subject }}</span>
+        <span class="truncate">{{ emojify(repo.rows[repo.rowIndex.get(h) ?? -1]?.subject ?? '') }}</span>
       </div>
     </div>
     <div class="grid gap-1.5 border-t p-3">

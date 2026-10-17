@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed, ref, watch } from 'vue'
 import { Archive, ArchiveRestore, GitBranchPlus, LoaderCircle, Trash2 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
@@ -45,7 +46,7 @@ function openFile(f: FileChange) {
       <LoaderCircle v-if="loading" class="size-3.5 animate-spin text-muted-foreground" />
     </div>
     <div v-if="stash" class="border-b px-3 py-3">
-      <h2 class="text-[14px] font-semibold">{{ stash.message }}</h2>
+      <h2 class="text-[14px] font-semibold">{{ emojify(stash.message) }}</h2>
       <p class="mt-1 text-[12px] text-muted-foreground">
         Criado {{ relativeTime(stash.time) }} ({{ absoluteTime(stash.time) }}) {{ stash.branch ? `em ${stash.branch}` : '' }}, sobre
         <span class="mono">{{ shortSha(stash.base) }}</span>

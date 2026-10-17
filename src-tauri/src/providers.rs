@@ -10,7 +10,7 @@ use serde_json::Value;
 use crate::errors::{AppError, AppResult, ErrorCode};
 use crate::settings::{Provider, ProviderAccount};
 
-const UA: &str = concat!("ForgeGraph/", env!("CARGO_PKG_VERSION"));
+const UA: &str = concat!("Commito/", env!("CARGO_PKG_VERSION"));
 
 pub fn http_client() -> Client {
     Client::builder()

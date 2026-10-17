@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed, ref, watch } from 'vue'
 import { ArrowLeft, LoaderCircle } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
@@ -59,7 +60,7 @@ function select(hash: string) {
         <button
           class="flex w-64 shrink-0 items-center gap-2 overflow-hidden border-r px-2 text-left font-sans text-[11px] text-muted-foreground hover:bg-[var(--row-hover)]"
           :style="{ boxShadow: `inset 3px 0 0 oklch(0.65 0.12 ${hashHue(l.hash)})` }"
-          :title="l.commit ? `${l.commit.summary}\n${l.commit.author}` : ''"
+          :title="l.commit ? `${emojify(l.commit.summary)}\n${l.commit.author}` : ''"
           @click="select(l.hash)"
         >
           <template v-if="l.first && l.commit">

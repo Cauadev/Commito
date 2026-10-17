@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { emojify } from '@/lib/emoji'
 import { computed, ref, watch } from 'vue'
 import { CherryIcon, Copy, FolderTree, GitBranchPlus, List, LoaderCircle, LogIn, ShieldCheck, ShieldAlert, Undo2 } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
@@ -76,8 +77,8 @@ const avatar = (n: string) => ({ background: `oklch(0.62 0.12 ${hashHue(n)})` })
     <div v-if="detail" class="min-h-0 flex-1 overflow-auto">
       <div class="border-b px-3 py-3">
         <div v-if="refs.length" class="mb-2"><RefBadges :refs="refs" :color="row?.color ?? 0" :head-branch="repo.currentBranch" :max="6" /></div>
-        <h2 class="selectable text-[14px] leading-snug font-semibold">{{ detail.subject }}</h2>
-        <pre v-if="detail.body" class="selectable mt-2 font-sans text-[12.5px] leading-relaxed whitespace-pre-wrap text-foreground/85">{{ detail.body }}</pre>
+        <h2 class="selectable text-[14px] leading-snug font-semibold">{{ emojify(detail.subject) }}</h2>
+        <pre v-if="detail.body" class="selectable mt-2 font-sans text-[12.5px] leading-relaxed whitespace-pre-wrap text-foreground/85">{{ emojify(detail.body) }}</pre>
 
         <div class="mt-3 flex items-center gap-2">
           <span class="grid size-7 shrink-0 place-items-center rounded-full text-[10px] font-bold text-black/80" :style="avatar(detail.authorName)">{{ initials(detail.authorName) }}</span>

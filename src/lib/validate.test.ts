@@ -25,3 +25,12 @@ describe('helpers', () => {
     expect(shortSha('0123456789abcdef')).toBe('0123456')
   })
 })
+
+import { emojify } from './emoji'
+describe('emojify', () => {
+  it('renders GitHub/gitmoji shortcodes and keeps unknown text', () => {
+    expect(emojify('commit teste :sparkles:')).toBe('commit teste ✨')
+    expect(emojify(':bug: fix :ambulance: :zap:')).toBe('🐛 fix 🚑 ⚡')
+    expect(emojify('às 10:30:00 :nao_existe:')).toBe('às 10:30:00 :nao_existe:')
+  })
+})

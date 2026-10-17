@@ -13,6 +13,7 @@ import { useUiStore } from '@/stores/ui'
 import AccountsDialog from '@/components/dialogs/AccountsDialog.vue'
 import SettingsDialog from '@/components/dialogs/SettingsDialog.vue'
 import AppLogo from './AppLogo.vue'
+import FooterActions from './FooterActions.vue'
 
 const app = useAppStore()
 const ui = useUiStore()
@@ -39,12 +40,13 @@ function openGitDownload() {
 </script>
 
 <template>
+  <div class="flex min-h-0 flex-1 flex-col">
   <div class="min-h-0 flex-1 overflow-auto">
     <div class="mx-auto flex max-w-4xl flex-col gap-8 px-8 py-10">
       <header class="flex items-center gap-4">
         <AppLogo class="size-12" />
         <div>
-          <h1 class="text-[22px] font-semibold tracking-tight">ForgeGraph</h1>
+          <h1 class="text-[22px] font-semibold tracking-tight">Commito</h1>
           <p class="text-[13px] text-muted-foreground">Cliente Git desktop — histórico em grafo, worktrees e GitHub/GitLab/Bitbucket.</p>
         </div>
         <div class="ml-auto flex gap-1">
@@ -60,7 +62,7 @@ function openGitDownload() {
           <div class="flex-1">
             <h2 class="font-semibold">{{ info.gitFound ? 'Versão do Git muito antiga' : 'Git não encontrado' }}</h2>
             <p class="mt-1 text-[12.5px] text-muted-foreground">
-              O ForgeGraph usa o Git instalado no Windows para todas as operações (inclui o Git Credential Manager para HTTPS).
+              O Commito usa o Git instalado no Windows para todas as operações (inclui o Git Credential Manager para HTTPS).
               {{ info.gitFound ? `Encontrado: ${info.gitVersion}. É necessário Git 2.36 ou superior.` : 'Instale o Git for Windows e clique em “Verificar novamente”. Se ele estiver instalado num local diferente, informe o caminho do git.exe nas Configurações.' }}
             </p>
             <div class="mt-3 flex gap-2">
@@ -130,8 +132,14 @@ function openGitDownload() {
           <component :is="info.lfsVersion ? CircleCheck : TriangleAlert" class="size-3.5" :class="info.lfsVersion ? 'text-success' : 'text-muted-foreground'" />
           {{ info.lfsVersion ? info.lfsVersion.split(' ')[0] : 'Git LFS não instalado' }}
         </span>
-        <span class="text-muted-foreground">ForgeGraph {{ info.version }}</span>
+        <span class="text-muted-foreground">Commito {{ info.version }}</span>
       </section>
     </div>
+  </div>
+  <div class="flex h-7 shrink-0 items-center gap-3 border-t bg-chrome px-3 text-[11.5px] text-muted-foreground">
+    <span>Commito {{ info?.version }}</span>
+    <span class="ml-auto shrink-0 text-faint">{{ info?.gitVersion?.replace('git version ', 'git ') }}</span>
+    <FooterActions />
+  </div>
   </div>
 </template>

@@ -1,0 +1,49 @@
+# Commito: donation API + release downloads. HTTPS is added by certbot (commito-cert.timer).
+limit_req_zone $binary_remote_addr zone=commito_pix:10m rate=20r/m;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name commito.cauadev.com;
+
+    access_log /var/log/nginx/commito.access.log;
+    error_log /var/log/nginx/commito.error.log;
+
+    # PIX QR code for the app: /api/pix?value=10
+    location = /api/pix {
+        limit_req zone=commito_pix burst=10 nodelay;
+        proxy_pass http://127.0.0.1:8787/pix$is_args$args;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 20s;
+    }
+
+    location = /api/health {
+        proxy_pass http://127.0.0.1:8787/health;
+    }
+
+    # Installers, signatures and the auto-update feed.
+    location /releases/ {
+        alias /var/www/commito/releases/;
+        autoindex off;
+        types {
+            application/json json;
+            application/octet-stream exe sig;
+        }
+    }
+
+    # The feed must never be cached: clients must see a new release immediately.
+    location = /releases/latest.json {
+        alias /var/www/commito/releases/latest.json;
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        default_type application/json;
+    }
+
+    location = / {
+        return 302 https://github.com/Cauadev/Commito;
+    }
+
+    location / {
+        return 404;
+    }
+}

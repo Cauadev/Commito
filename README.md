@@ -6,6 +6,10 @@ Cliente Git desktop para Windows, com o histórico em forma de grafo (branches e
 
 ---
 
+## Download
+
+Instalador mais recente: <https://commito.cauadev.com/releases/Commito-setup.exe>
+
 ## Instalação (usuário final)
 
 1. Instale o **Git for Windows** (inclui o Git Credential Manager): <https://git-scm.com/download/win>. Versão recomendada: 2.36 ou superior.
@@ -56,8 +60,8 @@ O executável do app (sem instalador) fica em `src-tauri\target\release\commito.
 ```powershell
 $env:COMMITO_UPDATE_URL = "https://github.com/<owner>/<repo>/releases/latest/download/latest.json"
 $env:COMMITO_DONATION_API_URL = "https://doacao.seudominio.com/pix"   # opcional
-pnpm release              # build assinado + latest.json
-pnpm release -- --publish # idem + cria a release no GitHub com o gh CLI
+pnpm release                  # build assinado + latest.json (URLs de commito.cauadev.com por padrão)
+pnpm release -- --publish-vps # idem + publica instalador, .sig e latest.json na VPS
 ```
 
 Saída em `src-tauri\target\release\bundle\nsis\`: `Commito_<versão>_x64-setup.exe`, o `.sig` e o `latest.json`. Publique os três na release (o `--publish` faz isso).
@@ -73,6 +77,8 @@ sis\`: `Commito_<versão>_x64-setup.exe`, o `.sig` e o `latest.json`. Publique o
 ### Doações (PIX)
 
 O botão de coração no rodapé abre um modal com valores sugeridos e mostra o QR code e o "copia e cola" devolvidos pela sua API (`COMMITO_DONATION_API_URL`). Um exemplo pronto, que usa o Asaas (`POST /v3/pix/qrCodes/static`) e mantém a chave do Asaas apenas no servidor, está em [`server/donation-api`](server/donation-api/README.md).
+
+Detalhes do servidor (API de doação, releases, HTTPS) em [`server/README.md`](server/README.md).
 
 ### Desenvolvimento isolado
 

@@ -1,6 +1,7 @@
 // Builds a signed release and the `latest.json` consumed by the auto-updater.
 //
 //   node scripts/release.mjs                 build only (updater disabled unless the URL is set)
+//   node scripts/release.mjs --publish-vps   also upload installer, signature and latest.json to the VPS
 //   node scripts/release.mjs --publish       also create the GitHub release with `gh`
 //
 // Environment:
@@ -21,8 +22,17 @@ const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const conf = JSON.parse(readFileSync(join(root, 'src-tauri', 'tauri.conf.json'), 'utf8'))
 const version = conf.version
 const publish = process.argv.includes('--publish')
+const publishVps = process.argv.includes('--publish-vps')
+
+// Official distribution server (override with the env vars below).
+const SITE = 'https://commito.cauadev.com'
+const VPS = process.env.COMMITO_VPS ?? 'root@187.77.246.113'
+const VPS_DIR = '/var/www/commito/releases'
 
 const env = { ...process.env }
+env.COMMITO_UPDATE_URL ??= `${SITE}/releases/latest.json`
+env.COMMITO_DONATION_API_URL ??= `${SITE}/api/pix`
+env.COMMITO_RELEASE_BASE_URL ??= `${SITE}/releases`
 const keyFile = join(homedir(), '.tauri', 'commito-updater.key')
 if (!env.TAURI_SIGNING_PRIVATE_KEY) {
   if (!existsSync(keyFile)) throw new Error(`Chave de assinatura não encontrada: ${keyFile}`)
@@ -65,6 +75,15 @@ const latest = {
 const latestFile = join(bundleDir, 'latest.json')
 writeFileSync(latestFile, JSON.stringify(latest, null, 2))
 console.log(`✓ ${join(bundleDir, setup)}\n✓ ${sigFile}\n✓ ${latestFile}`)
+
+if (publishVps) {
+  // Versioned files first; latest.json last (via rename) so clients never see a feed
+  // that points to a file that is not there yet.
+  execFileSync('scp', ['-q', join(bundleDir, setup), sigFile, `${VPS}:${VPS_DIR}/`], { stdio: 'inherit' })
+  execFileSync('scp', ['-q', latestFile, `${VPS}:${VPS_DIR}/latest.json.tmp`], { stdio: 'inherit' })
+  execFileSync('ssh', [VPS, `chmod 644 ${VPS_DIR}/* && mv ${VPS_DIR}/latest.json.tmp ${VPS_DIR}/latest.json && ln -sfn ${setup} ${VPS_DIR}/Commito-setup.exe`], { stdio: 'inherit' })
+  console.log(`✓ Publicado em ${SITE}/releases/${setup}`)
+}
 
 if (publish) {
   if (!gh) throw new Error('--publish requer COMMITO_UPDATE_URL apontando para um repositório GitHub.')

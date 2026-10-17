@@ -1,0 +1,10 @@
+[Unit]
+Description=Try to issue the commito.cauadev.com certificate until DNS is ready
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+Unit=commito-cert.service
+
+[Install]
+WantedBy=timers.target

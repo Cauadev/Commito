@@ -1,0 +1,6 @@
+[Unit]
+Description=Issue the commito.cauadev.com certificate (one shot)
+
+[Service]
+Type=oneshot
+ExecStart=/opt/commito/deploy/commito-cert.sh

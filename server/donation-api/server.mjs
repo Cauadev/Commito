@@ -11,6 +11,7 @@
 //   ASAAS_PIX_KEY    (required) PIX key registered in your Asaas account that receives the donations
 //   ASAAS_ENV        "production" (default) or "sandbox"
 //   PORT             default 8787
+//   HOST             default 127.0.0.1 (keep it behind the reverse proxy)
 //   DESCRIPTION      default "Doação Commito"
 //
 // No dependencies: Node.js 20+ (global fetch). Put it behind HTTPS (Caddy/Nginx) — the app only calls HTTPS URLs.
@@ -21,12 +22,11 @@ const API_KEY = process.env.ASAAS_API_KEY
 const PIX_KEY = process.env.ASAAS_PIX_KEY
 const BASE = process.env.ASAAS_ENV === 'sandbox' ? 'https://api-sandbox.asaas.com' : 'https://api.asaas.com'
 const PORT = Number(process.env.PORT ?? 8787)
+const HOST = process.env.HOST ?? '127.0.0.1'
 const DESCRIPTION = process.env.DESCRIPTION ?? 'Doação Commito'
 
-if (!API_KEY || !PIX_KEY) {
-  console.error('Defina ASAAS_API_KEY e ASAAS_PIX_KEY.')
-  process.exit(1)
-}
+const CONFIGURED = Boolean(API_KEY && PIX_KEY)
+if (!CONFIGURED) console.warn('ASAAS_API_KEY/ASAAS_PIX_KEY não definidas: /pix responderá 503 até serem configuradas.')
 
 // Static QR codes accept multiple payments, so one QR per amount can be reused for a while.
 const CACHE_MS = 6 * 60 * 60 * 1000
@@ -62,10 +62,12 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify(obj))
   }
   if (req.method !== 'GET') return send(405, { error: 'method not allowed' })
-  if (url.pathname === '/health') return send(200, { ok: true })
+  if (url.pathname === '/health') return send(200, { ok: true, configured: CONFIGURED })
   if (url.pathname !== '/pix') return send(404, { error: 'not found' })
 
-  const ip = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() ?? req.socket.remoteAddress ?? '?'
+  if (!CONFIGURED) return send(503, { error: 'donations not configured' })
+  // Behind nginx: X-Real-IP is set by the proxy (the service only listens on localhost).
+  const ip = req.headers['x-real-ip']?.toString() ?? req.headers['x-forwarded-for']?.toString().split(',')[0].trim() ?? req.socket.remoteAddress ?? '?'
   if (limited(ip)) return send(429, { error: 'too many requests' })
 
   let value = null
@@ -86,4 +88,4 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
-server.listen(PORT, () => console.log(`donation api on :${PORT} (${BASE})`))
+server.listen(PORT, HOST, () => console.log(`donation api on ${HOST}:${PORT} (${BASE})`))
